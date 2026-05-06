@@ -1,14 +1,17 @@
 import 'dotenv/config';
+import { z } from 'zod';
 
-const required = ['NODE_ENV', 'PORT'] as const;
+const envSchema = z.object({
+  NODE_ENV: z.enum(['development', 'production', 'test']),
+  PORT: z.coerce.number().int().positive(),
+  MONGO_CONNECTION_STRING: z.string().min(1),
+});
 
-for (const key of required) {
-  if (!process.env[key]) {
-    throw new Error(`Missing required environment variable: ${key}`);
-  }
+const parsed = envSchema.safeParse(process.env);
+
+if (!parsed.success) {
+  console.error('Invalid environment variables:\n' + z.prettifyError(parsed.error));
+  process.exit(1);
 }
 
-export const env = {
-  NODE_ENV: process.env['NODE_ENV'] as 'development' | 'production' | 'test',
-  PORT: Number(process.env['PORT']),
-} as const;
+export const env = parsed.data;
