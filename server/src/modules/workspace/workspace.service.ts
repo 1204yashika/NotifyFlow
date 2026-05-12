@@ -1,4 +1,5 @@
 import { ApiError } from '../../utils/ApiError.js';
+import { cache, CacheKeys } from '../../utils/cache.js';
 import { findByEmail } from '../auth/auth.repository.js';
 import {
   createWorkspace,
@@ -16,12 +17,19 @@ export async function createWorkspaceService(
   ownerId: string
 ): Promise<IWorkspace> {
   const workspace = await createWorkspace(input.name, input.description, ownerId);
+  await cache.del(CacheKeys.userWorkspaces(ownerId));
   return workspace;
 }
 
-
 export async function getUserWorkspaces(userId: string): Promise<IWorkspace[]> {
-  return findUserWorkspaces(userId);
+  const cacheKey = CacheKeys.userWorkspaces(userId);
+
+  const cached = await cache.get<IWorkspace[]>(cacheKey);
+  if (cached) return cached;
+
+  const workspaces = await findUserWorkspaces(userId);
+  await cache.set(cacheKey, workspaces, 300);
+  return workspaces;
 }
 
 export async function inviteMember(
@@ -36,7 +44,9 @@ export async function inviteMember(
   const alreadyMember = await findMember(workspaceId, String(userToInvite._id));
   if (alreadyMember) throw new ApiError(409, 'User is already a member');
 
-  return addMember(workspaceId, String(userToInvite._id), input.role);
+  const updated = await addMember(workspaceId, String(userToInvite._id), input.role);
+  await cache.del(CacheKeys.workspace(workspaceId));
+  return updated;
 }
 
 export async function removeMemberService(
@@ -55,4 +65,5 @@ export async function removeMemberService(
   }
 
   await removeMember(workspaceId, targetUserId);
+  await cache.del(CacheKeys.workspace(workspaceId));
 }
