@@ -8,11 +8,11 @@ export function rateLimiter(maxRequests: number, windowSeconds: number) {
             const identifier = req.ip ?? 'unknown';
             const key = `rate:${identifier}`;
 
-            const count = await redis.incr(key);
-
-            if (count === 1) {
-                await redis.expire(key, windowSeconds);
-            }
+            const pipeline = redis.pipeline();
+            pipeline.incr(key);
+            pipeline.expire(key, windowSeconds, 'NX');
+            const results = await pipeline.exec();
+            const count = (results?.[0]?.[1] as number) ?? 0;
 
             const ttl = await redis.ttl(key);
             const resetTimestamp = Math.floor(Date.now() / 1000) + ttl;
