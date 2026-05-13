@@ -10,6 +10,7 @@ const envSchema = z.object({
   JWT_EXPIRES_IN: z.string().default('15m'),
   JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
   REDIS_URL: z.string().min(1),
+  CLIENT_URL: z.string().min(1),
 });
 
 const parsed = envSchema.safeParse(process.env);

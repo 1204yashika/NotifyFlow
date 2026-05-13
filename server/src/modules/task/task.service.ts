@@ -10,6 +10,9 @@ import { findById, findMember } from "../workspace/workspace.repository.js";
 import { ApiError } from "../../utils/ApiError.js";
 import type { ITask } from "./task.model.js";
 import type { CreateTaskInput, GetTasksInput, UpdateTaskInput } from "./task.schema.js";
+import { appEvents } from '../../events/eventEmitter.js';
+import { Events } from '../../events/events.js';
+
 
 export async function createTaskService(
     input: CreateTaskInput,
@@ -23,7 +26,7 @@ export async function createTaskService(
         }
     }
 
-    return createTask({
+    const task = await createTask({
         title:       input.title,
         description: input.description,
         priority:    input.priority,
@@ -36,6 +39,15 @@ export async function createTaskService(
             ? new Date(input.dueDate)
             : null,
     });
+
+    appEvents.emit(Events.TASK_CREATED, {
+        workspaceId,
+        taskId: task._id.toString(),
+        actorId: createdBy,
+        data: task,
+    });
+
+    return task;
 }
 
 
@@ -59,11 +71,6 @@ export async function getWorkspaceTasks(
 }
 
 export async function getTaskById(taskId: string, workspaceId: string): Promise<ITask> {
-    const workspace = await findById(workspaceId);
-    if (!workspace) {
-        throw new ApiError(404, "Workspace not found");
-    }
-
     const task = await findTaskById(taskId);
     if (!task) {
         throw new ApiError(404, "Task not found");
@@ -99,7 +106,7 @@ export async function updateTask(
         }
     }
 
-    return updateTaskRepo(taskId, {
+    const updatedTask = await updateTaskRepo(taskId, {
         ...(input.title  !== undefined && { title: input.title }),
         ...(input.description !== undefined && { description: input.description }),
         ...(input.status !== undefined && { status: input.status }),
@@ -107,6 +114,15 @@ export async function updateTask(
         ...(input.assignedTo !== undefined && { assignedTo: new mongoose.Types.ObjectId(input.assignedTo) }),
         ...(input.dueDate !== undefined && { dueDate: new Date(input.dueDate) }),
     });
+
+    appEvents.emit(Events.TASK_UPDATED, {
+        workspaceId,
+        taskId,
+        actorId: requestingUserId,
+        data: updatedTask,
+    });
+
+    return updatedTask;
 }
 
 export async function deleteTaskService(
@@ -136,4 +152,11 @@ export async function deleteTaskService(
     }
 
     await deleteTaskRepo(taskId);
+
+    appEvents.emit(Events.TASK_DELETED, {
+        workspaceId,
+        taskId,
+        actorId: requestingUserId,
+        data: null,
+    });
 }

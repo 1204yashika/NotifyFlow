@@ -1,17 +1,32 @@
+import { createServer } from 'http';
 import app from './app.js';
 import { env } from './config/env.js';
 import { connectDB } from './config/db.js';
+import { initSocket } from './config/socket.js';
+import { registerTaskEventHandlers } from './events/handlers/task.events.js';
+import { registerWorkspaceEventHandlers } from './events/handlers/workspace.events.js';
 
 const start = async () => {
-  await connectDB(); // DB first, then listen
-  
-  const server = app.listen(env.PORT, () => {
+  await connectDB();
+
+  // register event handlers
+  registerTaskEventHandlers();
+  registerWorkspaceEventHandlers();
+
+  // create HTTP server from Express app
+  const httpServer = createServer(app);
+
+  // attach Socket.io to the SAME HTTP server
+  initSocket(httpServer);
+
+  // now listen on httpServer instead of app
+  httpServer.listen(env.PORT, () => {
     console.log(`Server running on port ${env.PORT} in ${env.NODE_ENV} mode`);
   });
 
   process.on('unhandledRejection', (err) => {
     console.error('Unhandled Rejection:', err);
-    server.close(() => process.exit(1));
+    httpServer.close(() => process.exit(1));
   });
 
   process.on('uncaughtException', (err) => {

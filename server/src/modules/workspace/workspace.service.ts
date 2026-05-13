@@ -11,6 +11,8 @@ import {
 } from './workspace.repository.js';
 import type { IWorkspace } from './workspace.model.js';
 import type { CreateWorkspaceInput, InviteMemberInput } from './workspace.schema.js';
+import { appEvents } from '../../events/eventEmitter.js';
+import { Events } from '../../events/events.js';
 
 export async function createWorkspaceService(
   input: CreateWorkspaceInput,
@@ -46,6 +48,14 @@ export async function inviteMember(
 
   const updated = await addMember(workspaceId, String(userToInvite._id), input.role);
   await cache.del(CacheKeys.workspace(workspaceId));
+
+  appEvents.emit(Events.MEMBER_INVITED, {
+    workspaceId,
+    userId: String(userToInvite._id),
+    actorId: String(workspace.owner),
+    data: updated,
+  });
+
   return updated;
 }
 
@@ -66,4 +76,11 @@ export async function removeMemberService(
 
   await removeMember(workspaceId, targetUserId);
   await cache.del(CacheKeys.workspace(workspaceId));
+
+  appEvents.emit(Events.MEMBER_REMOVED, {
+    workspaceId,
+    userId: targetUserId,
+    actorId: requestingUserId,
+    data: null,
+  });
 }
