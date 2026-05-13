@@ -5,6 +5,7 @@ import { connectDB } from './config/db.js';
 import { initSocket } from './config/socket.js';
 import { registerTaskEventHandlers } from './events/handlers/task.events.js';
 import { registerWorkspaceEventHandlers } from './events/handlers/workspace.events.js';
+import { startEmailWorker } from './queues/index.js';
 
 const start = async () => {
   await connectDB();
@@ -12,6 +13,8 @@ const start = async () => {
   // register event handlers
   registerTaskEventHandlers();
   registerWorkspaceEventHandlers();
+
+  startEmailWorker();
 
   // create HTTP server from Express app
   const httpServer = createServer(app);
