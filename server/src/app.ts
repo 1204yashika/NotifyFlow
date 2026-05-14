@@ -7,6 +7,7 @@ import healthRouter from './modules/health/health.router.js';
 import authRouter from './modules/auth/auth.router.js';
 import workspaceRouter from './modules/workspace/workspace.router.js';
 import taskRouter from './modules/task/task.router.js'
+import attachmentRouter from './modules/attachment/attachment.router.js'
 import { errorHandler } from './middlewares/errorHandler.js';
 
 const app = express();
@@ -20,7 +21,7 @@ app.use('/api/v1/health', healthRouter);
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/workspaces', workspaceRouter);
 app.use('/api/v1/workspaces/:workspaceId/tasks', taskRouter);
-
+app.use('/api/v1/workspaces/:workspaceId/attachments', attachmentRouter);
 app.use(errorHandler);
 
 export default app;
