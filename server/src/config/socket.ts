@@ -1,6 +1,7 @@
 import { Server } from 'socket.io';
 import type { Server as HTTPServer } from 'http';
 import { env } from './env.js';
+import { logger } from './logger.js';
 import { registerSocketHandlers } from '../sockets/index.js';
 
 let io: Server;
@@ -14,7 +15,7 @@ export function initSocket(httpServer: HTTPServer): void {
   });
 
   registerSocketHandlers(io);
-  console.log('Socket.io initialized');
+  logger.info('Socket.io initialized');
 }
 
 export function getIO(): Server {

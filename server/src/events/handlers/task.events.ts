@@ -2,6 +2,7 @@ import { appEvents } from '../eventEmitter.js';
 import { Events } from '../events.js';
 import { notifyWorkspace } from '../../utils/notify.js';
 import { emailQueue } from '../../queues/index.js';
+import { logger } from '../../config/logger.js';
 import { findById as findUserById } from '../../modules/user/user.repository.js';
 import { findById as findWorkspaceById } from '../../modules/workspace/workspace.repository.js';
 import type { ITask } from '../../modules/task/task.model.js';
@@ -36,7 +37,7 @@ export function registerTaskEventHandlers() {
       }
     } catch (err) {
       // log but never crash — email is non-critical
-      console.error('Failed to enqueue task assignment email:', err);
+      logger.error({ err }, 'Failed to enqueue task assignment email');
     }
   });
 

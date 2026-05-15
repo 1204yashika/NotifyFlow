@@ -1,5 +1,6 @@
 import { Worker } from 'bullmq';
 import { env } from '../config/env.js';
+import { logger } from '../config/logger.js';
 import { sendTaskAssigned } from './jobs/sendTaskAssigned.js';
 import type { EmailJobData } from './email.queue.js';
 
@@ -20,10 +21,10 @@ export function startEmailWorker(): void {
   );
 
   worker.on('completed', (job) => {
-    console.log(`Email job ${job.id} completed`);
+    logger.info({ jobId: job.id }, 'Email job completed');
   });
 
   worker.on('failed', (job, err) => {
-    console.error(`Email job ${job?.id} failed:`, err.message);
+    logger.error({ jobId: job?.id, err }, 'Email job failed');
   });
 }

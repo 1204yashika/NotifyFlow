@@ -1,4 +1,5 @@
 import { getIO } from '../config/socket.js';
+import { logger } from '../config/logger.js';
 
 export type NotificationPayload = {
   type:
@@ -22,7 +23,7 @@ export function notifyWorkspace(
     getIO().to(`workspace:${workspaceId}`).emit('notification', payload);
   } catch (err) {
     // never crash the app if socket fails
-    console.error('Failed to emit workspace notification:', err);
+    logger.error({ err }, 'Failed to emit workspace notification');
   }
 }
 
@@ -34,6 +35,6 @@ export function notifyUser(
   try {
     getIO().to(`user:${userId}`).emit('notification', payload);
   } catch (err) {
-    console.error('Failed to emit user notification:', err);
+    logger.error({ err }, 'Failed to emit user notification');
   }
 }

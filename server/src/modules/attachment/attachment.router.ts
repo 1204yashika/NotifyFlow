@@ -22,3 +22,5 @@ router.post(
 router.get('/', authenticate, authorize(['owner', 'member', 'viewer']), getAttachmentsController);
 router.get('/:attachmentId/url', authenticate, authorize(['owner', 'member', 'viewer']), getDownloadUrlController);
 router.delete('/:attachmentId', authenticate, authorize(['owner', 'member']), deleteAttachmentController);
+
+export default router;

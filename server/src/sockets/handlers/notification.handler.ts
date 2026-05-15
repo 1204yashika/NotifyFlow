@@ -1,6 +1,7 @@
 import type { Socket } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import { env } from '../../config/env.js';
+import { logger } from '../../config/logger.js';
 import { findUserWorkspaces } from '../../modules/workspace/workspace.repository.js';
 
 export async function notificationHandler(socket: Socket): Promise<void> {
@@ -37,22 +38,22 @@ export async function notificationHandler(socket: Socket): Promise<void> {
       await socket.join(`workspace:${workspace._id.toString()}`);
     }
 
-    console.log(`Socket connected: ${socket.id} | user: ${userId}`);
+    logger.info({ socketId: socket.id, userId }, 'Socket connected');
 
     // 6. handle manual workspace join (when user creates/joins a new workspace)
     socket.on('join_workspace', async (workspaceId: string) => {
       await socket.join(`workspace:${workspaceId}`);
-      console.log(`Socket ${socket.id} joined workspace:${workspaceId}`);
+      logger.info({ socketId: socket.id, workspaceId }, 'Socket joined workspace');
     });
 
     // 7. handle disconnect
     socket.on('disconnect', () => {
-      console.log(`Socket disconnected: ${socket.id} | user: ${userId}`);
+      logger.info({ socketId: socket.id, userId }, 'Socket disconnected');
       // socket.io auto-removes from all rooms — no cleanup needed
     });
 
   } catch (err) {
-    console.error('Socket connection error:', err);
+    logger.error({ err }, 'Socket connection error');
     socket.disconnect();
   }
 }
