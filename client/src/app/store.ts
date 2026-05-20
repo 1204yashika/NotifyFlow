@@ -1,10 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { baseApi } from '../services/baseApi';
 import authReducer from '../features/auth/authSlice';
+import workspaceReducer from '../features/workspace/workspaceSlice';
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
+    workspace: workspaceReducer,
     [baseApi.reducerPath]: baseApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
