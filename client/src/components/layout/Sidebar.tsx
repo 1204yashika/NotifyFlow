@@ -1,8 +1,9 @@
 import { Link, useLocation } from 'react-router-dom';
 import WorkspaceSwitcher from '../../features/workspace/components/WorkspaceSwitcher';
 import UserMenu from './UserMenu';
-import { useAppSelector } from '../../hooks/useAppSelector';
-import { selectActiveWorkspaceId } from '../../features/workspace/workspaceSlice';
+import { useState } from 'react';
+import CreateWorkspaceModal from '../../features/workspace/components/CreateWorkspaceModal';
+
 
 const NAV = [
   { label: 'Dashboard', path: '/dashboard', icon: '⊞' },
@@ -12,7 +13,8 @@ const NAV = [
 
 export default function Sidebar() {
   const location = useLocation();
-  const activeWorkspaceId = useAppSelector(selectActiveWorkspaceId);
+
+  const [createOpen, setCreateOpen] = useState(false);
 
   return (
     <aside className="w-56 bg-white border-r border-gray-200 flex flex-col h-screen">
@@ -46,14 +48,13 @@ export default function Sidebar() {
       <div className="p-3 flex-1 overflow-y-auto">
         <p className="text-xs text-gray-400 px-2 mb-2 uppercase tracking-wide">Workspaces</p>
         <WorkspaceSwitcher />
-        {activeWorkspaceId && (
-          <Link
-            to={`/workspace/${activeWorkspaceId}`}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-500 hover:bg-gray-50 mt-1"
-          >
-            <span>+</span> Add workspace
-          </Link>
-        )}
+        <button
+          onClick={() => setCreateOpen(true)}
+          className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-400 hover:bg-gray-50 mt-1 w-full"
+        >
+          <span>+</span> New workspace
+        </button>
+        <CreateWorkspaceModal isOpen={createOpen} onClose={() => setCreateOpen(false)} />
       </div>
 
       {/* User menu */}
