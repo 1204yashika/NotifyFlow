@@ -6,9 +6,9 @@ import CreateWorkspaceModal from '../../features/workspace/components/CreateWork
 
 
 const NAV = [
-  { label: 'Dashboard', path: '/dashboard', icon: '⊞' },
-  { label: 'My Tasks', path: '/my-tasks', icon: '✓' },
-  { label: 'Notifications', path: '/notifications', icon: '🔔' },
+  { label: 'Dashboard',     path: '/dashboard',     color: 'bg-[#534AB7]' },
+  { label: 'My Tasks',      path: '/my-tasks',       color: 'bg-[#1D9E75]' },
+  { label: 'Notifications', path: '/notifications',  color: 'bg-[#D85A30]' },
 ];
 
 export default function Sidebar() {
@@ -30,15 +30,13 @@ export default function Sidebar() {
       <nav className="p-3 border-b border-gray-200">
         <p className="text-xs text-gray-400 px-2 mb-2 uppercase tracking-wide">Main</p>
         {NAV.map((item) => (
-          <Link
-            key={item.path}
-            to={item.path}
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm mb-1
+          <Link key={item.path} to={item.path}
+            className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm mb-0.5 font-medium
               ${location.pathname === item.path
                 ? 'bg-[#EEEDFE] text-[#534AB7]'
                 : 'text-gray-600 hover:bg-gray-50'}`}
           >
-            <span>{item.icon}</span>
+            <div className={`w-1.5 h-1.5 rounded-full ${item.color}`} />
             {item.label}
           </Link>
         ))}
