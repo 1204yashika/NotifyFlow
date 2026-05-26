@@ -3,7 +3,11 @@ import mongoose, { Schema, Document } from 'mongoose';
 export type Role = 'owner' | 'member' | 'viewer';
 
 export interface IMember {
-  userId: mongoose.Types.ObjectId;
+  userId: mongoose.Types.ObjectId | {
+    _id: mongoose.Types.ObjectId;
+    name: string;
+    email: string;
+  };
   role: Role;
 }
 

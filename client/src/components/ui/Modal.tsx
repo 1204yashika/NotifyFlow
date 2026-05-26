@@ -26,8 +26,10 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
         onClick={onClose}
       />
       {/* modal */}
-      <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6 z-10">
-        <div className="flex items-center justify-between mb-4">
+      <div className="relative bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 z-10
+        max-h-[75vh] flex flex-col">
+        {/* fixed header */}
+        <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-gray-100 flex-shrink-0">
           <h2 className="text-base font-semibold text-gray-900">{title}</h2>
           <button
             onClick={onClose}
@@ -36,7 +38,10 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
             ✕
           </button>
         </div>
-        {children}
+        {/* scrollable body */}
+        <div className="overflow-y-auto flex-1 px-6 py-5">
+          {children}
+        </div>
       </div>
     </div>
   );

@@ -10,6 +10,7 @@ import taskRouter from './modules/task/task.router.js'
 import attachmentRouter from './modules/attachment/attachment.router.js'
 import { errorHandler } from './middlewares/errorHandler.js';
 import { setupSwagger } from './docs/swagger.js';
+import userRouter from './modules/user/user.router.js';
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/workspaces', workspaceRouter);
 app.use('/api/v1/workspaces/:workspaceId/tasks', taskRouter);
 app.use('/api/v1/workspaces/:workspaceId/attachments', attachmentRouter);
+app.use('/api/v1/users', userRouter);
 app.use(errorHandler);
 
 export default app;

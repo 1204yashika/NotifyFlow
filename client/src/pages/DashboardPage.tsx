@@ -1,11 +1,27 @@
+import { useNavigate } from 'react-router-dom';
 import { useGetMyWorkspacesQuery } from '../features/workspace/workspaceApi';
 import { useAppSelector } from '../hooks/useAppSelector';
 import { selectCurrentUser } from '../features/auth/authSlice';
+import { WorkspaceCardSkeleton, Skeleton } from '../components/ui/Skeleton';
 
 export default function DashboardPage() {
+  const navigate = useNavigate();
   const user = useAppSelector(selectCurrentUser);
-  const { data } = useGetMyWorkspacesQuery();
+  const { data, isLoading } = useGetMyWorkspacesQuery();
   const workspaces = data?.data ?? [];
+
+  if (isLoading) return (
+    <div className="p-6">
+      <Skeleton className="h-7 w-48 mb-2" />
+      <Skeleton className="h-4 w-32 mb-6" />
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        {[0,1,2].map(i => <Skeleton key={i} className="h-24 rounded-xl" />)}
+      </div>
+      <div className="bg-white border border-gray-200 rounded-xl">
+        {[0,1,2].map(i => <WorkspaceCardSkeleton key={i} />)}
+      </div>
+    </div>
+  );
 
   return (
     <div className="p-6">
@@ -43,20 +59,20 @@ export default function DashboardPage() {
           </div>
         ) : (
           workspaces.map((ws) => (
-            <div key={ws._id} className="flex items-center gap-3 p-4 border-b border-gray-100 last:border-0">
+            <div
+              key={ws._id}
+              onClick={() => navigate(`/workspace/${ws._id}`)}
+              className="flex items-center gap-3 p-4 border-b border-gray-100 last:border-0 cursor-pointer hover:bg-gray-50 transition-colors"
+            >
               <div className="w-8 h-8 bg-[#EEEDFE] rounded-lg flex items-center justify-center text-[#534AB7] font-semibold text-sm">
                 {ws.name[0].toUpperCase()}
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium text-gray-900">{ws.name}</p>
-                <p className="text-xs text-gray-400">{ws.members?.length ?? 0} members</p>
+                <p className="text-xs text-gray-400">
+                  {ws.members?.length ?? 0} members
+                </p>
               </div>
-              <a
-                href={`/workspace/${ws._id}`}
-                className="text-xs text-[#534AB7] hover:underline"
-              >
-                Open →
-              </a>
             </div>
           ))
         )}

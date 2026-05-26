@@ -5,6 +5,7 @@ interface GetTasksParams {
   workspaceId: string;
   status?: string;
   priority?: string;
+  assignedTo?: string;
   cursor?: string;
   limit?: number;
 }

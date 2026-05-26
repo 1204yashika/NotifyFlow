@@ -30,9 +30,11 @@ export function authorize(roles: Role[]) {
         return next();
       }
 
-      const member = workspace.members.find(
-        (m) => m.userId.toString() === userId
-      );
+      const member = workspace.members.find((m) => {
+        const id = m.userId as any;
+        const memberId = id._id?.toString() ?? id.toString();
+        return memberId === userId;
+      });
 
       if (!member || !roles.includes(member.role)) {
         return next(new ApiError(403, 'You do not have permission to perform this action'));

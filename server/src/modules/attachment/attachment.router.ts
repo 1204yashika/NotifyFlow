@@ -8,7 +8,7 @@ import { validateBody } from "../../middlewares/validateBody.js";
 import { uploadAttachmentSchema } from "./attachment.schema.js";
 import { deleteAttachmentController, getAttachmentsController, getDownloadUrlController, uploadAttachmentController } from "./attachment.controller.js";
 
-const router = Router();
+const router = Router({ mergeParams: true });
 
 router.post(
   '/',

@@ -5,18 +5,18 @@ export interface User {
   createdAt: string;
 }
 
+export interface Member {
+  userId: string | User;
+  role: 'owner' | 'member' | 'viewer';
+}
+
 export interface Workspace {
   _id: string;
   name: string;
   description: string;
-  owner: string;
+  owner: string | User;
   members: Member[];
   createdAt: string;
-}
-
-export interface Member {
-  userId: string;
-  role: 'owner' | 'member' | 'viewer';
 }
 
 export type TaskStatus = 'todo' | 'in_progress' | 'done';
@@ -56,4 +56,14 @@ export interface ApiResponse<T> {
 export interface PaginatedResponse<T> {
   tasks: T[];
   nextCursor: string | null;
+}
+
+export function getMemberName(member: Member): string {
+  if (typeof member.userId === 'string') return member.userId.slice(-6);
+  return member.userId.name;
+}
+
+export function getMemberId(member: Member): string {
+  if (typeof member.userId === 'string') return member.userId;
+  return member.userId._id;
 }

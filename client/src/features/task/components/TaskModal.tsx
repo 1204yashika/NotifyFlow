@@ -4,10 +4,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useCreateTaskMutation, useUpdateTaskMutation, useDeleteTaskMutation } from '../taskApi';
 import type { Task, Workspace } from '../../../types';
+import { getMemberId, getMemberName } from '../../../types';
 import Modal from '../../../components/ui/Modal';
-import Input from '../../../components/ui/Input';
 import Button from '../../../components/ui/Button';
 import FormError from '../../../components/ui/FormError';
+import AttachmentList from '../../attachment/components/AttachmentList';
 
 const schema = z.object({
   title: z.string().min(2).max(100),
@@ -16,9 +17,9 @@ const schema = z.object({
   status: z.enum(['todo', 'in_progress', 'done']).default('todo'),
   assignedTo: z.string().optional(),
   dueDate: z.string().optional().transform((val) => {
-	if (!val) return undefined;
-	return new Date(val).toISOString(); // "2026-05-24" → "2026-05-24T00:00:00.000Z"
-	}),
+    if (!val) return undefined;
+    return new Date(val).toISOString();
+  }),
 });
 
 type FormInput = z.input<typeof schema>;
@@ -28,10 +29,14 @@ interface Props {
   onClose: () => void;
   workspaceId: string;
   workspace: Workspace;
-  task?: Task | null;   // if set → edit mode
+  task?: Task | null;
+  isOwner: boolean;
 }
 
-export default function TaskModal({ isOpen, onClose, workspaceId, workspace, task }: Props) {
+const selectCls = 'w-full text-sm border border-gray-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#534AB7] focus:ring-2 focus:ring-[#534AB7]/10 bg-white text-gray-800 transition-all';
+const labelCls  = 'text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5';
+
+export default function TaskModal({ isOpen, onClose, workspaceId, workspace, task, isOwner }: Props) {
   const isEdit = !!task;
   const [createTask, { isLoading: creating }] = useCreateTaskMutation();
   const [updateTask, { isLoading: updating }] = useUpdateTaskMutation();
@@ -41,7 +46,6 @@ export default function TaskModal({ isOpen, onClose, workspaceId, workspace, tas
     resolver: zodResolver(schema),
   });
 
-  // populate form when editing
   useEffect(() => {
     if (task) {
       reset({
@@ -69,9 +73,7 @@ export default function TaskModal({ isOpen, onClose, workspaceId, workspace, tas
       reset();
       onClose();
     } catch (err: any) {
-      setError('root', {
-        message: err?.data?.message ?? 'Something went wrong',
-      });
+      setError('root', { message: err?.data?.message ?? 'Something went wrong' });
     }
   };
 
@@ -85,83 +87,83 @@ export default function TaskModal({ isOpen, onClose, workspaceId, workspace, tas
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={isEdit ? 'Edit task' : 'New task'}>
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
         <FormError message={errors.root?.message} />
 
-        <Input
-          label="Title"
-          placeholder="Task title"
-          error={errors.title?.message}
-          {...register('title')}
-        />
+        {/* Title */}
+        <div className="flex flex-col">
+          <label className={labelCls}>Title</label>
+          <input
+            placeholder="What needs to be done?"
+            className={`w-full text-sm border rounded-lg px-3 py-2.5 outline-none transition-all bg-white
+              focus:border-[#534AB7] focus:ring-2 focus:ring-[#534AB7]/10
+              ${errors.title ? 'border-red-400' : 'border-gray-200'}`}
+            {...register('title')}
+          />
+          {errors.title && <p className="text-xs text-red-500 mt-1">{errors.title.message}</p>}
+        </div>
 
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-gray-700">Description</label>
+        {/* Description */}
+        <div className="flex flex-col">
+          <label className={labelCls}>Description</label>
           <textarea
             rows={3}
-            placeholder="Optional description"
-            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#534AB7] resize-none"
+            placeholder="Add more details..."
+            className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#534AB7] focus:ring-2 focus:ring-[#534AB7]/10 resize-none bg-white transition-all"
             {...register('description')}
           />
         </div>
 
+        {/* Priority + Status */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-gray-700">Priority</label>
-            <select
-              className="text-sm border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-[#534AB7]"
-              {...register('priority')}
-            >
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
+          <div className="flex flex-col">
+            <label className={labelCls}>Priority</label>
+            <select className={selectCls} {...register('priority')}>
+              <option value="low">🟢 Low</option>
+              <option value="medium">🟡 Medium</option>
+              <option value="high">🔴 High</option>
             </select>
           </div>
-
           {isEdit && (
-            <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium text-gray-700">Status</label>
-              <select
-                className="text-sm border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-[#534AB7]"
-                {...register('status')}
-              >
-                <option value="todo">Todo</option>
-                <option value="in_progress">In Progress</option>
-                <option value="done">Done</option>
+            <div className="flex flex-col">
+              <label className={labelCls}>Status</label>
+              <select className={selectCls} {...register('status')}>
+                <option value="todo">📋 Todo</option>
+                <option value="in_progress">⚡ In Progress</option>
+                <option value="done">✅ Done</option>
               </select>
             </div>
           )}
         </div>
 
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-gray-700">Assign to</label>
-          <select
-            className="text-sm border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-[#534AB7]"
-            {...register('assignedTo')}
-          >
-            <option value="">Unassigned</option>
+        {/* Assign to */}
+        <div className="flex flex-col">
+          <label className={labelCls}>Assign to</label>
+          <select className={selectCls} {...register('assignedTo')}>
+            <option value="">— Unassigned</option>
             {workspace.members.map((m) => (
-              <option key={m.userId} value={m.userId}>{m.userId}</option>
+              <option key={getMemberId(m)} value={getMemberId(m)}>
+                {getMemberName(m)}
+              </option>
             ))}
           </select>
         </div>
 
-        <Input
-          label="Due date"
-          type="date"
-          error={errors.dueDate?.message}
-          {...register('dueDate')}
-        />
+        {/* Due date */}
+        <div className="flex flex-col">
+          <label className={labelCls}>Due date</label>
+          <input
+            type="date"
+            className={selectCls}
+            {...register('dueDate')}
+          />
+        </div>
 
-        <div className="flex gap-2 justify-between mt-2">
+        {/* Buttons */}
+        <div className="flex gap-2 justify-between pt-3 border-t border-gray-100 mt-1">
           {isEdit && (
-            <Button
-              type="button"
-              variant="ghost"
-              isLoading={deleting}
-              onClick={handleDelete}
-              className="text-red-500 hover:bg-red-50"
-            >
+            <Button type="button" variant="ghost" isLoading={deleting} onClick={handleDelete}
+              className="text-red-500 hover:bg-red-50">
               Delete
             </Button>
           )}
@@ -173,6 +175,16 @@ export default function TaskModal({ isOpen, onClose, workspaceId, workspace, tas
           </div>
         </div>
       </form>
+
+      {/* Attachments */}
+      {isEdit && task && (
+        <div className="mt-5 pt-4 border-t border-gray-100">
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
+            📎 Attachments
+          </p>
+          <AttachmentList workspaceId={workspaceId} taskId={task._id} isOwner={isOwner} />
+        </div>
+      )}
     </Modal>
   );
 }

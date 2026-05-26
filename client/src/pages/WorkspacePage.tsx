@@ -11,7 +11,10 @@ import TaskFilters from '../features/task/components/TaskFilters';
 import MemberList from '../features/workspace/components/MemberList';
 import InviteMemberModal from '../features/workspace/components/InviteMemberModal';
 import Button from '../components/ui/Button';
+import { useSocket } from '../hooks/useSocket';
 import type { Task } from '../types';
+import { KanbanSkeleton, Skeleton } from '../components/ui/Skeleton';
+import EmptyState from '../components/ui/EmptyState';
 
 export default function WorkspacePage() {
   const { workspaceId } = useParams<{ workspaceId: string }>();
@@ -37,6 +40,8 @@ export default function WorkspacePage() {
   const nextCursor = taskData?.data?.nextCursor ?? null;
   const isOwner = workspace?.owner === user?._id;
 
+  useSocket(filters);
+
   const handleTaskClick = (task: Task) => {
     setSelectedTask(task);
     setTaskModalOpen(true);
@@ -47,7 +52,16 @@ export default function WorkspacePage() {
     setTaskModalOpen(true);
   };
 
-  if (wsLoading) return <div className="p-6 text-sm text-gray-400">Loading...</div>;
+  if (wsLoading) return (
+  <div className="p-6 w-full">
+    <div className="mb-6 pb-5 border-b border-gray-200">
+      <Skeleton className="h-3 w-20 mb-2" />
+      <Skeleton className="h-7 w-48 mb-2" />
+      <Skeleton className="h-4 w-32" />
+    </div>
+    <KanbanSkeleton />
+  </div>
+);
   if (!workspace) return <div className="p-6 text-sm text-red-500">Workspace not found.</div>;
 
   return (
@@ -112,7 +126,15 @@ export default function WorkspacePage() {
           view={view}
           onViewChange={setView}
         />
-        {view === 'kanban' ? (
+
+        {tasks.length === 0 && !tasksLoading ? (
+          <EmptyState
+            icon="📋"
+            title="No tasks yet"
+            description="Create your first task to get started"
+            action={{ label: '+ New task', onClick: handleNewTask }}
+          />
+        ) : view === 'kanban' ? (
           <TaskBoard
             tasks={tasks}
             workspaceId={workspaceId!}
@@ -132,7 +154,7 @@ export default function WorkspacePage() {
 
     {/* Members tab */}
     {activeTab === 'members' && (
-      <MemberList workspace={workspace} currentUserId={user?._id ?? ''} />
+      <MemberList workspace={workspace} />
     )}
 
     {/* Modals */}
@@ -142,6 +164,7 @@ export default function WorkspacePage() {
       workspaceId={workspaceId!}
       workspace={workspace}
       task={selectedTask}
+      isOwner={isOwner} 
     />
     <InviteMemberModal
       isOpen={inviteOpen}

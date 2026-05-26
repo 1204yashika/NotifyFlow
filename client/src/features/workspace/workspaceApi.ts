@@ -39,6 +39,18 @@ export const workspaceApi = baseApi.injectEndpoints({
         { type: 'Workspace', id: workspaceId }
       ],
     }),
+    removeMember: builder.mutation<ApiResponse<null>, {
+      workspaceId: string;
+      userId: string;
+    }>({
+      query: ({ workspaceId, userId }) => ({
+        url: `/workspaces/${workspaceId}/members/${userId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (_result, _err, { workspaceId }) => [
+        { type: 'Workspace', id: workspaceId }
+      ],
+    }),
   }),
 });
 
@@ -47,4 +59,5 @@ export const {
   useCreateWorkspaceMutation,
   useGetWorkspaceQuery,
   useInviteMemberMutation,
+  useRemoveMemberMutation
 } = workspaceApi;
