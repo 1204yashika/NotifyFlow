@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { ApiError } from "../../utils/ApiError.js";
 import { Workspace, type IWorkspace, type Role } from "./workspace.model.js";
 
@@ -5,8 +6,8 @@ export async function createWorkspace(name: string, description:string, ownerId:
 	const workspace = await Workspace.create({
 		name: name,
 		description: description,
-		owner: ownerId,
-		members: [{ userId: ownerId, role: 'owner' }]
+		owner: new mongoose.Types.ObjectId(ownerId),
+		members: [{ userId: new mongoose.Types.ObjectId(ownerId), role: 'owner' }]
 	})
 
 	if(!workspace){
@@ -15,8 +16,8 @@ export async function createWorkspace(name: string, description:string, ownerId:
 	return workspace;
 }
 
-export async function findById(id: string): Promise<IWorkspace | null>{
-	return Workspace.findById(id);
+export async function findById(id: string): Promise<IWorkspace | null> {
+  return Workspace.findById(id).populate('members.userId', 'name email') as Promise<IWorkspace | null>;
 }
 
 export async function findUserWorkspaces(userId: string): Promise<IWorkspace[]> {
@@ -25,7 +26,7 @@ export async function findUserWorkspaces(userId: string): Promise<IWorkspace[]> 
       { owner: userId },
       { 'members.userId': userId },
     ],
-  });
+  }).populate('members.userId', 'name email');
 }
 
 export async function addMember(

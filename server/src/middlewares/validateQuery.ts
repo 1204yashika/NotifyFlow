@@ -13,7 +13,7 @@ export function validateQuery(schema: ZodType) {
       return next(new ApiError(400, message));
     }
 
-    req.query = result.data as typeof req.query;
+    (req as any).validatedQuery = result.data;
     next();
   };
 }
