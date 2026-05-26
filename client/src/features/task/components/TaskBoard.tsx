@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import type { Task, TaskStatus } from '../../../types';
 import TaskCard from './TaskCard';
 import { useUpdateTaskMutation } from '../taskApi';
-import EmptyState from '../../../components/ui/EmptyState';
 
 const COLUMNS: { id: TaskStatus; label: string }[] = [
   { id: 'todo',        label: 'Todo' },

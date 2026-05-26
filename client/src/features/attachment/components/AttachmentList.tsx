@@ -31,7 +31,7 @@ export default function AttachmentList({ workspaceId, taskId, isOwner }: Props) 
 
   const attachments = data?.data ?? [];
 
-  const handleDownload = async (attachmentId: string, fileName: string) => {
+  const handleDownload = async (attachmentId: string, _fileName: string) => {
     try {
       const res = await getUrl({ workspaceId, attachmentId }).unwrap();
       // open presigned URL in new tab

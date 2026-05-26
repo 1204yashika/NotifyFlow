@@ -20,7 +20,6 @@ interface Props {
 }
 
 const labelCls = 'text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5';
-const selectCls = 'w-full text-sm border border-gray-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#534AB7] focus:ring-2 focus:ring-[#534AB7]/10 bg-white text-gray-800 transition-all';
 
 export default function InviteMemberModal({ isOpen, onClose, workspaceId }: Props) {
   const [inviteMember, { isLoading }] = useInviteMemberMutation();

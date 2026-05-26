@@ -1,6 +1,5 @@
 import { useRef, useState } from 'react';
 import { tokenStorage } from '../../../utils/tokenStorage';
-import Button from '../../../components/ui/Button';
 
 interface Props {
 workspaceId: string;

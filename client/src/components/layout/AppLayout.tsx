@@ -7,7 +7,6 @@ import { useAppSelector } from '../../hooks/useAppSelector';
 import { setCredentials, selectAccessToken } from '../../features/auth/authSlice';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
-import { useSocket } from '../../hooks/useSocket';
 
 export default function AppLayout() {
   const dispatch = useAppDispatch();
