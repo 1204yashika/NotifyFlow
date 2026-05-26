@@ -4,17 +4,19 @@ import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-    },
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
   },
   server: {
     proxy: {
-      '/api': 'http://localhost:3000', 
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+      },
       '/socket.io': {
         target: 'http://localhost:3000',
-        ws: true,                        
+        ws: true,
       },
     },
   },
