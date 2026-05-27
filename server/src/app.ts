@@ -16,7 +16,10 @@ const app = express();
 
 app.use('/api/docs', (_req, _res, next) => next(), helmet({ contentSecurityPolicy: false }));
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+  origin: env.CLIENT_URL,
+  credentials: true,
+}));
 app.use(requestLogger);
 app.use(express.json());
 
