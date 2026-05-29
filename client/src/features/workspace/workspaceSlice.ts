@@ -5,8 +5,10 @@ interface WorkspaceState {
   activeWorkspaceId: string | null;
 }
 
+const ls = () => (typeof localStorage !== 'undefined' ? localStorage : null);
+
 const initialState: WorkspaceState = {
-  activeWorkspaceId: localStorage.getItem('activeWorkspaceId'),
+  activeWorkspaceId: ls()?.getItem('activeWorkspaceId') ?? null,
 };
 
 const workspaceSlice = createSlice({
@@ -15,11 +17,11 @@ const workspaceSlice = createSlice({
   reducers: {
     setActiveWorkspace: (state, action: PayloadAction<string>) => {
       state.activeWorkspaceId = action.payload;
-      localStorage.setItem('activeWorkspaceId', action.payload);
+      ls()?.setItem('activeWorkspaceId', action.payload);
     },
     clearActiveWorkspace: (state) => {
       state.activeWorkspaceId = null;
-      localStorage.removeItem('activeWorkspaceId');
+      ls()?.removeItem('activeWorkspaceId');
     },
   },
 });

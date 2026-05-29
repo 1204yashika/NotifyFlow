@@ -42,7 +42,7 @@ export default function LoginForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
       <div>
         <h1 className="text-xl font-semibold text-gray-900">Welcome back</h1>
         <p className="text-sm text-gray-500 mt-1">Sign in to your account</p>
@@ -56,6 +56,7 @@ export default function LoginForm() {
         placeholder="you@example.com"
         error={errors.email?.message}
         {...register('email')}
+        id="Email"
       />
 
       <Input
@@ -64,6 +65,7 @@ export default function LoginForm() {
         placeholder="••••••••"
         error={errors.password?.message}
         {...register('password')}
+        id="Password"
       />
 
       <Button type="submit" isLoading={isLoading} className="w-full mt-2">
