@@ -67,3 +67,8 @@ export function getMemberId(member: Member): string {
   if (typeof member.userId === 'string') return member.userId;
   return member.userId._id;
 }
+
+export function getMemberEmail(member: Member): string {
+  if (typeof member.userId === 'string') return '';
+  return member.userId.email;
+}

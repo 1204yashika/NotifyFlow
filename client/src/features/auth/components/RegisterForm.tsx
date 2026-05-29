@@ -51,7 +51,7 @@ export default function RegisterForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
       <div>
         <h1 className="text-xl font-semibold text-gray-900">Create account</h1>
         <p className="text-sm text-gray-500 mt-1">Get started with NotifyFlow</p>
@@ -64,6 +64,7 @@ export default function RegisterForm() {
         placeholder="John Doe"
         error={errors.name?.message}
         {...register('name')}
+        id="Name"
       />
       <Input
         label="Email"
@@ -71,6 +72,7 @@ export default function RegisterForm() {
         placeholder="you@example.com"
         error={errors.email?.message}
         {...register('email')}
+        id="Email"
       />
       <Input
         label="Password"
@@ -78,6 +80,7 @@ export default function RegisterForm() {
         placeholder="••••••••"
         error={errors.password?.message}
         {...register('password')}
+        id="Password"
       />
       <Input
         label="Confirm Password"
@@ -85,6 +88,7 @@ export default function RegisterForm() {
         placeholder="••••••••"
         error={errors.confirmPassword?.message}
         {...register('confirmPassword')}
+        id="Confirm Password"
       />
 
       <Button type="submit" isLoading={isLoading} className="w-full mt-2">
