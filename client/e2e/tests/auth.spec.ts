@@ -56,7 +56,7 @@ test.describe('Authentication', () => {
       const registerPage = new RegisterPage(page);
       await registerPage.goto();
 
-      await expect(page.getByText('Create account')).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Create account' })).toBeVisible();
     });
 
     test('shows error when passwords dont match', async ({ page }) => {
@@ -90,6 +90,7 @@ test.describe('Authentication', () => {
 
       // click user menu
       await page.locator('[class*="rounded-full"]').first().click();
+	  await page.getByText('User').click();
       await page.getByText('Sign out').click();
 
       await expect(page).toHaveURL(/.*login/);
