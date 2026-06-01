@@ -1,9 +1,10 @@
 import type { Request, Response, NextFunction } from 'express';
-import redis from '../config/redis.js';
+import redis, { redisAvailable } from '../config/redis.js';
 import { ApiError } from '../utils/ApiError.js';
 
 export function rateLimiter(maxRequests: number, windowSeconds: number) {
     return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        if (process.env.NODE_ENV === 'development' || !redisAvailable) return next();
         try {
             const identifier = req.ip ?? 'unknown';
             const key = `rate:${identifier}`;

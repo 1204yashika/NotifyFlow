@@ -90,7 +90,7 @@ test.describe('Authentication', () => {
 
       // click user menu
       await page.locator('[class*="rounded-full"]').first().click();
-	  await page.getByText('User').click();
+	  await page.getByText('Yashika Agrawal').click();
       await page.getByText('Sign out').click();
 
       await expect(page).toHaveURL(/.*login/);
@@ -101,6 +101,7 @@ test.describe('Authentication', () => {
 
       // logout
       await page.locator('[class*="rounded-full"]').first().click();
+      await page.getByText('Yashika Agrawal').click();
       await page.getByText('Sign out').click();
 
       // try to go back

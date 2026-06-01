@@ -25,6 +25,10 @@ app.use(express.json());
 
 setupSwagger(app);
 
+app.get('/', (_req, res) => {
+  res.json({ status: 'ok', message: 'Server is up', uptime: Math.floor(process.uptime()) });
+});
+
 app.use('/api/v1/health', healthRouter);
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/workspaces', workspaceRouter);

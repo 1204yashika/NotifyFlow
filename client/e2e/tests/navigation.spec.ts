@@ -32,7 +32,7 @@ test.describe('Navigation', () => {
 
   test('my tasks page shows tasks assigned to user', async ({ page, authenticatedPage }) => {
     await page.goto('/my-tasks');
-    await expect(page.getByText('My Tasks')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'My Tasks' })).toBeVisible();
     await expect(page.getByText('All tasks assigned to you')).toBeVisible();
   });
 });

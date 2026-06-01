@@ -54,12 +54,14 @@ export default function CreateWorkspaceModal({ isOpen, onClose }: Props) {
           placeholder="e.g. Engineering"
           error={errors.name?.message}
           {...register('name')}
+          id="workspace-name"
         />
         <Input
           label="Description (optional)"
           placeholder="What is this workspace for?"
           error={errors.description?.message}
           {...register('description')}
+          id="description"
         />
         <div className="flex gap-2 justify-end mt-2">
           <Button variant="outline" type="button" onClick={onClose}>

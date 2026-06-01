@@ -10,7 +10,8 @@ export default defineConfig({
 
   use: {
     // your deployed Vercel URL
-    baseURL: 'https://notify-flow-pi.vercel.app',
+	baseURL: "http://localhost:5173",
+    // baseURL: 'https://notify-flow-pi.vercel.app',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'on-first-retry',

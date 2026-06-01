@@ -2,13 +2,24 @@ import { test, expect } from '../fixtures/auth.fixture';
 import { WorkspacePage } from '../pages/WorkspacePage';
 
 test.describe('Task Management', () => {
-  let workspaceUrl: string;
 
   test.beforeEach(async ({ page, authenticatedPage }) => {
     await page.goto('/dashboard');
-    await page.getByText('Open →').first().click();
-    await page.waitForURL(/.*workspace\/.*/);
-    workspaceUrl = page.url();
+
+    const workspaceCard = page.locator('div[class*="hover:bg-gray-50"]').first();
+    const hasWorkspace = await workspaceCard.isVisible({ timeout: 3000 }).catch(() => false);
+
+    if (!hasWorkspace) {
+      await page.getByText('+ New workspace').click();
+      await page.getByLabel('Workspace name').fill('E2E Workspace');
+      await page.getByRole('button', { name: /create/i }).click();
+      await page.waitForURL(/.*workspace\/.*/);
+    } else {
+      await workspaceCard.click();
+      await page.waitForURL(/.*workspace\/.*/);
+    }
+
+    await page.waitForLoadState('networkidle');
   });
 
   test('shows empty state when no tasks', async ({ page }) => {
@@ -31,7 +42,7 @@ test.describe('Task Management', () => {
     await workspacePage.createTask('E2E Test Task');
 
     // task should appear on board
-    await expect(page.getByText('E2E Test Task')).toBeVisible();
+    await expect(page.getByText('E2E Test Task', { exact: true })).toBeVisible();
   });
 
   test('can create task with all fields', async ({ page }) => {
@@ -44,8 +55,8 @@ test.describe('Task Management', () => {
     await page.getByLabel('Due date').fill('2026-12-31');
     await page.getByRole('button', { name: /create task/i }).click();
 
-    await expect(page.getByText('Full Task')).toBeVisible();
-    await expect(page.getByText('high')).toBeVisible();
+    await expect(page.getByText('Full Task', { exact: true })).toBeVisible();
+    await expect(page.getByText('high', { exact: true })).toBeVisible();
   });
 
   test('can edit an existing task', async ({ page }) => {
@@ -55,10 +66,10 @@ test.describe('Task Management', () => {
     await workspacePage.createTask('Task to Edit');
 
     // click on the task
-    await page.getByText('Task to Edit').click();
+    await page.getByText('Task to Edit', { exact: true }).click();
 
     // modal opens in edit mode
-    await expect(page.getByText('Edit task')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Edit task' })).toBeVisible();
 
     // update title
     await page.getByLabel('Title').clear();
@@ -66,7 +77,7 @@ test.describe('Task Management', () => {
     await page.getByRole('button', { name: /save changes/i }).click();
 
     // updated title should show
-    await expect(page.getByText('Updated Task Title')).toBeVisible();
+    await expect(page.getByText('Updated Task Title', { exact: true })).toBeVisible();
   });
 
   test('can delete a task', async ({ page }) => {
@@ -74,31 +85,34 @@ test.describe('Task Management', () => {
 
     // create task
     await workspacePage.createTask('Task to Delete');
-    await expect(page.getByText('Task to Delete')).toBeVisible();
+    await expect(page.getByText('Task to Delete', { exact: true })).toBeVisible();
 
     // click task to open modal
-    await page.getByText('Task to Delete').click();
+    await page.getByText('Task to Delete', { exact: true }).click();
 
     // click delete
-    await page.getByRole('button', { name: /delete/i }).click();
+    await page.getByRole('button', { name: 'Delete', exact: true }).click();
 
     // task should be gone
-    await expect(page.getByText('Task to Delete')).not.toBeVisible();
+    await expect(page.getByText('Task to Delete', { exact: true })).not.toBeVisible();
   });
 
   test('can switch between kanban and list view', async ({ page }) => {
     const workspacePage = new WorkspacePage(page);
 
-    // start in kanban
-    await expect(page.getByText('TODO')).toBeVisible();
+    // kanban columns only show when tasks exist
+    await workspacePage.createTask('View Switch Task');
+
+    // start in kanban — match the h3 column heading specifically
+    await expect(page.getByRole('heading', { name: 'Todo', exact: true }).first()).toBeVisible();
 
     // switch to list
     await workspacePage.switchToList();
-    await expect(page.getByText('TODO')).not.toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Todo', exact: true })).not.toBeVisible();
 
     // switch back to kanban
     await workspacePage.switchToKanban();
-    await expect(page.getByText('TODO')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Todo', exact: true }).first()).toBeVisible();
   });
 
   test('can filter tasks by priority', async ({ page }) => {
@@ -106,7 +120,7 @@ test.describe('Task Management', () => {
 
     // create high priority task
     await workspacePage.createTask('High Priority Task');
-    await page.getByText('High Priority Task').click();
+    await page.getByText('High Priority Task', { exact: true }).click();
     await page.getByLabel('Priority').selectOption('high');
     await page.getByRole('button', { name: /save changes/i }).click();
 
@@ -114,16 +128,16 @@ test.describe('Task Management', () => {
     await page.getByRole('combobox').nth(1).selectOption('high');
 
     // only high priority tasks visible
-    await expect(page.getByText('High Priority Task')).toBeVisible();
+    await expect(page.getByText('High Priority Task', { exact: true })).toBeVisible();
   });
 
   test('kanban columns show correct task counts', async ({ page }) => {
     const workspacePage = new WorkspacePage(page);
     await workspacePage.createTask('Count Test Task');
 
-    // todo column should show at least 1
-    const todoCount = page.locator('.bg-gray-100').first()
-      .locator('.rounded-full').first();
+    // todo column count span (bg-white rounded-full) next to "Todo" heading
+    const todoCount = page.getByRole('heading', { name: 'Todo', exact: true })
+      .locator('..').locator('span.rounded-full').first();
     await expect(todoCount).not.toHaveText('0');
   });
 
@@ -131,8 +145,8 @@ test.describe('Task Management', () => {
     const workspacePage = new WorkspacePage(page);
     await workspacePage.newTaskButton.click();
 
-    await expect(page.getByText('New task')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'New task' })).toBeVisible();
     await page.keyboard.press('Escape');
-    await expect(page.getByText('New task')).not.toBeVisible();
+    await expect(page.getByRole('heading', { name: 'New task' })).not.toBeVisible();
   });
 });

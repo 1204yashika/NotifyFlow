@@ -13,7 +13,7 @@ test.describe('Real-time Notifications', () => {
 
     // open bell
     await page.getByText('🔔').click();
-    await expect(page.getByText('Notifications')).toBeVisible();
+    await expect(page.locator('span.font-semibold', { hasText: 'Notifications' })).toBeVisible();
 
     // close by clicking outside
     await page.keyboard.press('Escape');
@@ -36,8 +36,8 @@ test.describe('Real-time Notifications', () => {
   test('notifications page loads correctly', async ({ page, authenticatedPage }) => {
     await page.goto('/notifications');
 
-    await expect(page.getByText('Notifications')).toBeVisible();
-    await expect(page.getByText('Activity')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Notifications' })).toBeVisible();
+    await expect(page.getByText('Activity', { exact: true })).toBeVisible();
   });
 
   test.describe('Two browser contexts (real-time)', () => {
