@@ -14,7 +14,7 @@ export class WorkspacePage {
 
   constructor(page: Page) {
     this.page = page;
-    this.newTaskButton = page.getByRole('button', { name: /new task/i });
+    this.newTaskButton = page.getByRole('button', { name: /new task/i }).first();
     this.inviteButton = page.getByRole('button', { name: /invite/i });
     this.tasksTab = page.getByRole('button', { name: /tasks/i });
     this.membersTab = page.getByRole('button', { name: /members/i });

@@ -15,7 +15,7 @@ const schema = z.object({
   description: z.string().max(500).optional(),
   priority: z.enum(['low', 'medium', 'high']).default('medium'),
   status: z.enum(['todo', 'in_progress', 'done']).default('todo'),
-  assignedTo: z.string().optional(),
+  assignedTo: z.string().optional().transform(val => val || undefined),
   dueDate: z.string().optional().transform((val) => {
     if (!val) return undefined;
     return new Date(val).toISOString();
@@ -92,8 +92,9 @@ export default function TaskModal({ isOpen, onClose, workspaceId, workspace, tas
 
         {/* Title */}
         <div className="flex flex-col">
-          <label className={labelCls}>Title</label>
+          <label htmlFor="task-title" className={labelCls}>Title</label>
           <input
+            id="task-title"
             placeholder="What needs to be done?"
             className={`w-full text-sm border rounded-lg px-3 py-2.5 outline-none transition-all bg-white
               focus:border-[#534AB7] focus:ring-2 focus:ring-[#534AB7]/10
@@ -105,8 +106,9 @@ export default function TaskModal({ isOpen, onClose, workspaceId, workspace, tas
 
         {/* Description */}
         <div className="flex flex-col">
-          <label className={labelCls}>Description</label>
+          <label htmlFor="task-description" className={labelCls}>Description</label>
           <textarea
+            id="task-description"
             rows={3}
             placeholder="Add more details..."
             className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#534AB7] focus:ring-2 focus:ring-[#534AB7]/10 resize-none bg-white transition-all"
@@ -117,8 +119,8 @@ export default function TaskModal({ isOpen, onClose, workspaceId, workspace, tas
         {/* Priority + Status */}
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col">
-            <label className={labelCls}>Priority</label>
-            <select className={selectCls} {...register('priority')}>
+            <label htmlFor="task-priority" className={labelCls}>Priority</label>
+            <select id="task-priority" className={selectCls} {...register('priority')}>
               <option value="low">🟢 Low</option>
               <option value="medium">🟡 Medium</option>
               <option value="high">🔴 High</option>
@@ -126,8 +128,8 @@ export default function TaskModal({ isOpen, onClose, workspaceId, workspace, tas
           </div>
           {isEdit && (
             <div className="flex flex-col">
-              <label className={labelCls}>Status</label>
-              <select className={selectCls} {...register('status')}>
+              <label htmlFor="task-status" className={labelCls}>Status</label>
+              <select id="task-status" className={selectCls} {...register('status')}>
                 <option value="todo">📋 Todo</option>
                 <option value="in_progress">⚡ In Progress</option>
                 <option value="done">✅ Done</option>
@@ -138,8 +140,8 @@ export default function TaskModal({ isOpen, onClose, workspaceId, workspace, tas
 
         {/* Assign to */}
         <div className="flex flex-col">
-          <label className={labelCls}>Assign to</label>
-          <select className={selectCls} {...register('assignedTo')}>
+          <label htmlFor="task-assigned-to" className={labelCls}>Assign to</label>
+          <select id="task-assigned-to" className={selectCls} {...register('assignedTo')}>
             <option value="">— Unassigned</option>
             {workspace.members.map((m) => (
               <option key={getMemberId(m)} value={getMemberId(m)}>
@@ -151,8 +153,9 @@ export default function TaskModal({ isOpen, onClose, workspaceId, workspace, tas
 
         {/* Due date */}
         <div className="flex flex-col">
-          <label className={labelCls}>Due date</label>
+          <label htmlFor="task-due-date" className={labelCls}>Due date</label>
           <input
+            id="task-due-date"
             type="date"
             className={selectCls}
             {...register('dueDate')}

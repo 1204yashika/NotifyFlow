@@ -5,20 +5,28 @@ import { sendTaskAssigned } from './jobs/sendTaskAssigned.js';
 import type { EmailJobData } from './email.queue.js';
 
 export function startEmailWorker(): void {
-  const worker = new Worker<EmailJobData>(
-    'email',
-    async (job) => {
-      if (job.data.type === 'task_assigned') {
-        await sendTaskAssigned(job);
-      }
-    },
-    {
-      connection: {
-        url: env.REDIS_URL,
-        maxRetriesPerRequest: null,
+  let worker: Worker<EmailJobData>;
+
+  try {
+    worker = new Worker<EmailJobData>(
+      'email',
+      async (job) => {
+        if (job.data.type === 'task_assigned') {
+          await sendTaskAssigned(job);
+        }
       },
-    }
-  );
+      {
+        connection: {
+          url: env.REDIS_URL,
+          maxRetriesPerRequest: null,
+          enableOfflineQueue: false,
+        },
+      }
+    );
+  } catch (err) {
+    logger.warn({ err }, 'Email worker could not start — Redis unavailable');
+    return;
+  }
 
   worker.on('completed', (job) => {
     logger.info({ jobId: job.id }, 'Email job completed');
@@ -26,5 +34,9 @@ export function startEmailWorker(): void {
 
   worker.on('failed', (job, err) => {
     logger.error({ jobId: job?.id, err }, 'Email job failed');
+  });
+
+  worker.on('error', (err) => {
+    logger.warn({ err }, 'Email worker error — continuing without email queue');
   });
 }
