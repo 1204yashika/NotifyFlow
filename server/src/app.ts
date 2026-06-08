@@ -14,8 +14,14 @@ import userRouter from './modules/user/user.router.js';
 
 const app = express();
 
+app.set('etag', false); // prevent 304s on dynamic API responses
+
 app.use('/api/docs', (_req, _res, next) => next(), helmet({ contentSecurityPolicy: false }));
 app.use(helmet());
+app.use('/api', (_req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store');
+  next();
+});
 app.use(cors({
   origin: env.CLIENT_URL,
   credentials: true,
