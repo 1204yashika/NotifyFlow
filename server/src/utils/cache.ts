@@ -1,20 +1,32 @@
 import redis from '../config/redis.js';
 
 async function get<T>(key: string): Promise<T | null> {
-    const data = await redis.get(key);
-    if (!data) return null;
-    return JSON.parse(data) as T;
+    try {
+        const data = await redis.get(key);
+        if (!data) return null;
+        return JSON.parse(data) as T;
+    } catch {
+        return null;
+    }
 }
 
 async function set(key: string, value: unknown, ttlSeconds: number): Promise<void> {
-    await redis.set(key, JSON.stringify(value), 'EX', ttlSeconds);
+    try {
+        await redis.set(key, JSON.stringify(value), 'EX', ttlSeconds);
+    } catch {
+        // Redis unavailable — cache miss is acceptable
+    }
 }
 
 async function del(key: string | string[]): Promise<void> {
-    if (Array.isArray(key)) {
-        await redis.del(...key);
-    } else {
-        await redis.del(key);
+    try {
+        if (Array.isArray(key)) {
+            await redis.del(...key);
+        } else {
+            await redis.del(key);
+        }
+    } catch {
+        // Redis unavailable — stale cache entries will expire naturally
     }
 }
 

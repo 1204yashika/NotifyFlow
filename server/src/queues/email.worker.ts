@@ -37,6 +37,11 @@ export function startEmailWorker(): void {
   });
 
   worker.on('error', (err) => {
+    if (err.message?.includes('max requests limit exceeded')) {
+      logger.error({ err }, 'Redis request limit hit — stopping email worker to prevent further quota burn');
+      worker.close().catch(() => {});
+      return;
+    }
     logger.warn({ err }, 'Email worker error — continuing without email queue');
   });
 }

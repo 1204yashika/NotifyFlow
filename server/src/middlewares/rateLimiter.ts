@@ -27,8 +27,8 @@ export function rateLimiter(maxRequests: number, windowSeconds: number) {
             }
 
             next();
-        } catch (err) {
-            next(err);
+        } catch {
+            next(); // Redis unavailable — skip rate limiting rather than blocking the request
         }
     };
 }
