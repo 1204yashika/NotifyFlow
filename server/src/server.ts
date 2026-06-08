@@ -50,6 +50,11 @@ const start = async () => {
   process.on('SIGTERM', () => shutdown('SIGTERM'));
   process.on('SIGINT',  () => shutdown('SIGINT'));
   process.on('unhandledRejection', (err) => {
+    const message = err instanceof Error ? err.message : String(err);
+    if (message.includes('max requests limit exceeded') || message.includes('Connection is closed')) {
+      logger.warn({ err }, 'Redis unavailable — ignoring unhandled rejection, server stays up');
+      return;
+    }
     logger.error({ err }, 'Unhandled Rejection');
     shutdown('unhandledRejection');
   });
