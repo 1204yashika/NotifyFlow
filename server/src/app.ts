@@ -23,7 +23,17 @@ app.use('/api', (_req, res, next) => {
   next();
 });
 app.use(cors({
-  origin: env.CLIENT_URL,
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true); // allow server-to-server / curl
+    const allowed = [
+      env.CLIENT_URL,
+      /^https:\/\/notify-flow-.*\.vercel\.app$/,
+    ];
+    const ok = allowed.some((rule) =>
+      typeof rule === 'string' ? rule === origin : rule.test(origin)
+    );
+    callback(ok ? null : new Error(`CORS: origin ${origin} not allowed`), ok);
+  },
   credentials: true,
 }));
 app.use(requestLogger);

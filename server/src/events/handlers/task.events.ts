@@ -2,6 +2,7 @@ import { appEvents } from '../eventEmitter.js';
 import { Events } from '../events.js';
 import { notifyWorkspace } from '../../utils/notify.js';
 import { emailQueue } from '../../queues/index.js';
+import { sendTaskAssignedEmail } from '../../queues/jobs/sendTaskAssigned.js';
 import { logger } from '../../config/logger.js';
 import { findById as findUserById } from '../../modules/user/user.repository.js';
 import { findById as findWorkspaceById } from '../../modules/workspace/workspace.repository.js';
@@ -26,18 +27,23 @@ export function registerTaskEventHandlers() {
         ]);
 
         if (assignee && workspace && actor) {
-          await emailQueue.add('task_assigned', {
-            type: 'task_assigned',
+          const emailData = {
             to: assignee.email,
             taskTitle: task.title,
             workspaceName: workspace.name,
             assignedBy: actor.name,
-          });
+          };
+          try {
+            await emailQueue.add('task_assigned', { type: 'task_assigned', ...emailData });
+          } catch {
+            // Redis unavailable — send directly via SMTP
+            logger.warn('Email queue unavailable, sending task assignment email directly');
+            await sendTaskAssignedEmail(emailData);
+          }
         }
       }
     } catch (err) {
-      // log but never crash — email is non-critical
-      logger.error({ err }, 'Failed to enqueue task assignment email');
+      logger.error({ err }, 'Failed to send task assignment email');
     }
   });
 
